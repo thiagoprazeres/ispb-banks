@@ -1,60 +1,13 @@
-import { INSTITUTIONS, METADATA } from './data.js';
-export type { Institution } from './data.js';
-
-export { INSTITUTIONS };
-
-export interface Metadata {
-  source: string;
-  sourceUrl: string;
-  sourceDate: string;
-  recordCount: number;
-}
-
-/**
- * Returns the full Institution record for the given ISPB code.
- * Returns `undefined` if the ISPB is not found.
- */
-export function getInstitution(ispb: string) {
-  return INSTITUTIONS[ispb.padStart(8, '0')];
-}
-
-/**
- * Returns `true` if the given ISPB code exists in the dataset.
- */
-export function hasIspb(ispb: string): boolean {
-  return ispb.padStart(8, '0') in INSTITUTIONS;
-}
-
-/**
- * Case-insensitive search across institution names and short names.
- * Returns all matching Institution records.
- */
-export function searchInstitutions(query: string) {
-  const q = query.toLowerCase();
-  return Object.values(INSTITUTIONS).filter(
-    inst =>
-      inst.name.toLowerCase().includes(q) ||
-      inst.shortName.toLowerCase().includes(q)
-  );
-}
-
-/**
- * Returns dataset metadata: source, sourceDate, and record count.
- */
-export function getMetadata(): Metadata {
-  return { ...METADATA };
-}
-
 export interface ParsedE2EId {
   /** 8-digit ISPB of the initiating institution */
   ispb: string;
-  /** Institution name, or undefined if ISPB is not in the dataset */
-  institutionName: string | undefined;
   /** Date/time the transaction was initiated (UTC) */
   initiatedAt: Date;
   /** The 11-char unique suffix */
   suffix: string;
 }
+
+const E2EID_REGEX = /^E\d{8}\d{8}\d{4}[A-Za-z0-9]{11}$/;
 
 /**
  * Parses a Pix endToEndId (E2E ID) as defined by BACEN.
@@ -65,7 +18,7 @@ export interface ParsedE2EId {
  * @throws {Error} if the string is not a valid E2E ID or contains impossible date/time values
  */
 export function parseE2EId(e2eId: string): ParsedE2EId {
-  if (!/^E\d{8}\d{8}\d{4}[A-Za-z0-9]{11}$/.test(e2eId)) {
+  if (!E2EID_REGEX.test(e2eId)) {
     throw new Error(
       `Invalid endToEndId: "${e2eId}". Expected format: E{ISPB8}{YYYYMMDD}{HHmm}{11 alphanumeric chars}`
     );
@@ -104,10 +57,18 @@ export function parseE2EId(e2eId: string): ParsedE2EId {
     throw new Error(`Invalid endToEndId: date ${year}-${mm}-${dd} does not exist`);
   }
 
-  return {
-    ispb,
-    institutionName: INSTITUTIONS[ispb]?.name,
-    initiatedAt,
-    suffix,
-  };
+  return { ispb, initiatedAt, suffix };
+}
+
+/**
+ * Returns `true` if the given string is a syntactically and semantically valid Pix endToEndId.
+ * Never throws.
+ */
+export function isValidE2EId(e2eId: string): boolean {
+  try {
+    parseE2EId(e2eId);
+    return true;
+  } catch {
+    return false;
+  }
 }

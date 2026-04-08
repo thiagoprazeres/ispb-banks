@@ -1,52 +1,12 @@
 {
-  "name": "ispb-banks",
-  "version": "2.0.0",
-  "description": "ISPB to institution name mapping for all Brazilian Pix participants (SPI) + endToEndId parser",
-  "keywords": [
-    "pix",
-    "ispb",
-    "spi",
-    "banco-central",
-    "brazil",
-    "banks",
-    "bacen",
-    "endToEndId"
-  ],
-  "author": "Thiago Prazeres <thiago@cafeina.dev>",
-  "license": "Apache-2.0",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/thiagoprazeres/ispb-banks.git"
-  },
-  "homepage": "https://github.com/thiagoprazeres/ispb-banks#readme",
-  "bugs": {
-    "url": "https://github.com/thiagoprazeres/ispb-banks/issues"
-  },
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist"
-  ],
+  "name": "ispb-banks-monorepo",
+  "private": true,
   "scripts": {
-    "build": "tsup",
-    "generate": "tsx scripts/generate.ts",
-    "test": "vitest run",
-    "prepublishOnly": "npm run build"
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "generate": "pnpm --filter @thiagoprazeres/ispb-participants generate"
   },
   "devDependencies": {
-    "@types/node": "^25.5.2",
-    "csv-parse": "^6.2.1",
-    "tsup": "^8.0.0",
-    "tsx": "^4.21.0",
-    "typescript": "^5.0.0",
-    "vitest": "^4.1.3"
+    "typescript": "^5.0.0"
   }
 }

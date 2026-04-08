@@ -1,80 +1,67 @@
-# ispb-banks — Pix Tools Monorepo
+# ispb-banks
 
-[![license](https://img.shields.io/github/license/thiagoprazeres/ispb-banks)](./LICENSE)
+[![npm](https://img.shields.io/npm/v/ispb-banks)](https://www.npmjs.com/package/ispb-banks)
+[![license](https://img.shields.io/npm/l/ispb-banks)](./LICENSE)
 
-A pnpm monorepo with focused, zero-dependency TypeScript libraries for the Brazilian **Pix** ecosystem. All data and specs sourced from official BACEN publications.
+Convenience meta-package that re-exports the three focused Pix libraries for Brazil in a single install.
 
-## Packages
-
-### [`@thiagoprazeres/ispb-participants`](./packages/ispb-participants)
-
-[![npm](https://img.shields.io/npm/v/@thiagoprazeres/ispb-participants)](https://www.npmjs.com/package/@thiagoprazeres/ispb-participants)
-
-ISPB → institution mapping for **all 900+ Brazilian Pix/SPI participants** — updated automatically from the official BACEN dataset every week.
+```bash
+npm install ispb-banks
+```
 
 ```ts
-import { getInstitution, searchInstitutions } from '@thiagoprazeres/ispb-participants';
+import {
+  getInstitution,        // from @thiagoprazeres/ispb-participants
+  parseE2EId,            // from @thiagoprazeres/parse-e2eid
+  generateStaticBrCode,  // from @thiagoprazeres/pix-static-brcode
+} from 'ispb-banks';
+```
 
+## What's included
+
+| Export | Source package | Purpose |
+|--------|---------------|---------|
+| `getInstitution`, `hasIspb`, `searchInstitutions`, `INSTITUTIONS`, `getMetadata` | [`@thiagoprazeres/ispb-participants`](https://github.com/thiagoprazeres/ispb-participants) | ISPB → institution mapping (900+ SPI participants) |
+| `parseE2EId`, `isValidE2EId` | [`@thiagoprazeres/parse-e2eid`](https://github.com/thiagoprazeres/parse-e2eid) | Pix endToEndId parser with semantic date validation |
+| `generateStaticBrCode`, `parseStaticBrCode`, `isValidBrCode`, `validateCrc16`, `projectReceiverName`, `projectCity`, `buildBrCodeRef` | [`@thiagoprazeres/pix-static-brcode`](https://github.com/thiagoprazeres/pix-static-brcode) | Static BR Code (EMV QRCPS-MPM) generation, parsing and CRC-16 validation |
+
+## Usage
+
+```ts
+import {
+  getInstitution,
+  parseE2EId,
+  generateStaticBrCode,
+  projectReceiverName,
+  projectCity,
+  buildBrCodeRef,
+} from 'ispb-banks';
+
+// ISPB lookup
 getInstitution('60746948');
 // { ispb: '60746948', name: 'Banco Bradesco S.A.', ... }
 
-searchInstitutions('nubank');
-// [{ ispb: '18236120', name: 'Nu Pagamentos S.A.', ... }]
-```
-
----
-
-### [`@thiagoprazeres/parse-e2eid`](./packages/parse-e2eid)
-
-[![npm](https://img.shields.io/npm/v/@thiagoprazeres/parse-e2eid)](https://www.npmjs.com/package/@thiagoprazeres/parse-e2eid)
-
-Parse and validate Brazilian Pix **endToEndId** — semantic date validation included, zero deps.
-
-```ts
-import { parseE2EId, isValidE2EId } from '@thiagoprazeres/parse-e2eid';
-
+// Parse endToEndId
 parseE2EId('E6074694820230615143012345678901');
-// { ispb: '60746948', initiatedAt: Date('2023-06-15T14:30:00Z'), suffix: '12345678901' }
+// { ispb: '60746948', initiatedAt: Date('2023-06-15T14:30:00Z'), suffix: '...' }
 
-isValidE2EId('E6074694820230231143012345678901'); // → false (Feb 31 doesn't exist)
+// Generate BR Code
+const payload = generateStaticBrCode({
+  pixKey: '11999998888',
+  receiverName: projectReceiverName('João da Silva'),
+  receiverCity: projectCity('São Paulo'),
+  referenceLabel: buildBrCodeRef(crypto.randomUUID()),
+  amount: 99.90,
+});
 ```
 
----
+## Individual packages
 
-### [`@thiagoprazeres/pix-static-brcode`](./packages/pix-static-brcode)
+If you only need one of the three libraries, install the focused package directly to avoid pulling unused code:
 
-[![npm](https://img.shields.io/npm/v/@thiagoprazeres/pix-static-brcode)](https://www.npmjs.com/package/@thiagoprazeres/pix-static-brcode)
-
-Generate, parse and validate Brazilian Pix **static BR Code** (EMV QRCPS-MPM) — CRC-16 validation included, zero deps.
-
-```ts
-import { generateStaticBrCode, parseStaticBrCode, isValidBrCode } from '@thiagoprazeres/pix-static-brcode';
-
-const payload = generateStaticBrCode({ pixKey: '11999998888', receiverName: 'JOAO DA SILVA', receiverCity: 'SAO PAULO', referenceLabel: 'REF001' });
-parseStaticBrCode(payload); // → { pixKey, receiverName, receiverCity, referenceLabel }
-isValidBrCode(payload);     // → true
-```
-
----
-
-## Composition example
-
-```ts
-import { parseE2EId } from '@thiagoprazeres/parse-e2eid';
-import { getInstitution } from '@thiagoprazeres/ispb-participants';
-
-const { ispb, initiatedAt } = parseE2EId(endToEndId);
-const institution = getInstitution(ispb);
-console.log(`Pago por ${institution?.name} em ${initiatedAt.toISOString()}`);
-```
-
----
-
-## References
-
-- [Manual do BR Code (BACEN)](https://www.bcb.gov.br/content/estabilidadefinanceira/ativosdosite/Manual%20do%20BR%20Code.pdf)
-- [Manual de Padrões para Iniciação do Pix (BACEN)](https://www.bcb.gov.br/content/estabilidadefinanceira/pix/Regulamento_Pix/II_ManualdePadroesparaIniciacaodoPix.pdf)
-- [BACEN SPI participant list](https://www.bcb.gov.br/estabilidadefinanceira/participantespi)
+- [`@thiagoprazeres/ispb-participants`](https://github.com/thiagoprazeres/ispb-participants) — ISPB catalog only
+- [`@thiagoprazeres/parse-e2eid`](https://github.com/thiagoprazeres/parse-e2eid) — endToEndId parser only
+- [`@thiagoprazeres/pix-static-brcode`](https://github.com/thiagoprazeres/pix-static-brcode) — BR Code generator only
 
 ## License
 

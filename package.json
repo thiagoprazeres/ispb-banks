@@ -1,12 +1,42 @@
 {
-  "name": "ispb-banks-monorepo",
-  "private": true,
+  "name": "ispb-banks",
+  "version": "2.1.0",
+  "description": "Pix toolkit for Brazil: ISPB participants, endToEndId parser, and static BR Code generator — convenience re-export of the three @thiagoprazeres packages",
+  "keywords": ["pix", "ispb", "brcode", "e2eid", "bacen", "brazil", "fintech"],
+  "author": "Thiago Prazeres <thiago@cafeina.dev>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thiagoprazeres/ispb-banks.git"
+  },
+  "homepage": "https://github.com/thiagoprazeres/ispb-banks#readme",
+  "bugs": { "url": "https://github.com/thiagoprazeres/ispb-banks/issues" },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
   "scripts": {
-    "build": "pnpm -r build",
-    "test": "pnpm -r test",
-    "generate": "pnpm --filter @thiagoprazeres/ispb-participants generate"
+    "build": "tsup",
+    "test": "echo 'No tests in wrapper — tests live in each package repo'",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@thiagoprazeres/ispb-participants": "^1.0.0",
+    "@thiagoprazeres/parse-e2eid": "^1.0.0",
+    "@thiagoprazeres/pix-static-brcode": "^1.0.0"
   },
   "devDependencies": {
+    "tsup": "^8.0.0",
     "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

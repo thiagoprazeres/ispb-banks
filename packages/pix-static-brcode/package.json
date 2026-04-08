@@ -1,0 +1,36 @@
+{
+  "name": "@thiagoprazeres/pix-static-brcode",
+  "version": "1.0.0",
+  "description": "Generate, parse and validate Brazilian Pix static BR Code — zero runtime dependencies",
+  "keywords": ["pix", "brcode", "br-code", "qrcode", "static", "bacen", "brazil", "emv", "crc16"],
+  "author": "Thiago Prazeres <thiago@cafeina.dev>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thiagoprazeres/ispb-banks.git",
+    "directory": "packages/pix-static-brcode"
+  },
+  "homepage": "https://github.com/thiagoprazeres/ispb-banks/tree/main/packages/pix-static-brcode#readme",
+  "bugs": { "url": "https://github.com/thiagoprazeres/ispb-banks/issues" },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "prepublishOnly": "pnpm run build"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.3"
+  }
+}

@@ -54,7 +54,7 @@ getMetadata();
 //   source: 'BACEN SPI (ParticipantesSPI.csv)',
 //   sourceUrl: 'https://www.bcb.gov.br/...',
 //   sourceDate: '2026-04-08',
-//   recordCount: 930
+//   recordCount: 927
 // }
 ```
 

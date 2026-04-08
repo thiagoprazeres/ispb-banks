@@ -13,9 +13,6 @@ const DATA_PATH = join(__dirname, '../src/data.ts');
 const BACEN_CSV_URL =
   'https://www.bcb.gov.br/content/estabilidadefinanceira/spi/ParticipantesSPI.csv';
 
-const GITHUB_README_URL =
-  'https://raw.githubusercontent.com/pitz/participantes-do-pix/main/README.md';
-
 function pad(ispb: string): string {
   return ispb.trim().padStart(8, '0');
 }
@@ -38,7 +35,7 @@ async function fetchBacenCsv(): Promise<Row[] | null> {
   try {
     const res = await fetch(BACEN_CSV_URL, { signal: AbortSignal.timeout(15_000) });
     if (!res.ok) {
-      console.log(`  BACEN CSV returned ${res.status} — trying fallback...`);
+      console.log(`  BACEN CSV returned ${res.status}.`);
       return null;
     }
     const text = await res.text();
@@ -93,33 +90,11 @@ async function fetchBacenCsv(): Promise<Row[] | null> {
   }
 }
 
-async function fetchGithubReadme(): Promise<Row[]> {
-  console.log('  Fetching GitHub README:', GITHUB_README_URL);
-  const res = await fetch(GITHUB_README_URL, { signal: AbortSignal.timeout(15_000) });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-  const text = await res.text();
-  const rows: Row[] = [];
-  const regex = /\[ispb:\s*"([^"]+)",\s*cnpj:\s*"([^"]*)",\s*name:\s*"([^"]+)"\]/g;
-  let m: RegExpExecArray | null;
-  while ((m = regex.exec(text)) !== null) {
-    rows.push({
-      ispb: pad(m[1]!),
-      name: m[3]!.trim(),
-      shortName: m[3]!.trim(),
-      cnpj: m[2] || undefined,
-    });
-  }
-
-  if (rows.length < 100) throw new Error(`Only ${rows.length} entries — unexpected format`);
-  console.log(`  ✓ GitHub README: ${rows.length} participants`);
-  return rows;
-}
-
 async function main(): Promise<void> {
   console.log('\n🏦 Generating src/data.ts...');
 
-  const raw = (await fetchBacenCsv()) ?? (await fetchGithubReadme());
+  const raw = await fetchBacenCsv();
+  if (!raw) throw new Error('BACEN CSV unavailable — aborting. No unofficial fallback.');
   // Deduplicate by ISPB (last occurrence wins)
   const deduped = new Map<string, Row>();
   for (const r of raw) deduped.set(r.ispb, r);
